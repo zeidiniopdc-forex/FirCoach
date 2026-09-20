@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_VERSION: '24'
-  JAVA_VERSION: '17'
+  JAVA_VERSION: '21'
 
 jobs:
   build-apk:
@@ -60,6 +60,26 @@ jobs:
 
       - name: Make Gradlew executable
         run: chmod +x android/gradlew
+
+      - name: Configure Java version
+        run: |
+          echo "org.gradle.java.home=$JAVA_HOME" > android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx2048m" >> android/gradle.properties
+          cat android/gradle.properties
+          
+          echo "=== Updating all build.gradle files to Java 21 ==="
+          # Update all build.gradle files to use Java 21
+          find android -name "build.gradle" -type f | while read file; do
+            echo "Processing: $file"
+            sed -i 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/JavaVersion.VERSION_11/JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/sourceCompatibility .*/sourceCompatibility JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/targetCompatibility .*/targetCompatibility JavaVersion.VERSION_21/g' "$file"
+          done
+          
+          echo "=== Verifying Java version in build.gradle files ==="
+          grep -r "JavaVersion" android/ || echo "No JavaVersion found"
 
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true
