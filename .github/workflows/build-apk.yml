@@ -8,13 +8,14 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   JAVA_VERSION: '17'
 
 jobs:
   build-apk:
     name: Build Debug APK
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -35,6 +36,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Install dependencies
         run: npm ci
 
@@ -42,7 +53,7 @@ jobs:
         run: npm run build
 
       - name: Add Android platform
-        run: yes | npx cap add android
+        run: npx cap add android
 
       - name: Sync Capacitor
         run: npx cap sync android
@@ -50,10 +61,24 @@ jobs:
       - name: Make Gradlew executable
         run: chmod +x android/gradlew
 
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Verify APK
+        run: |
+          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            echo "✅ APK built successfully"
+            ls -lh android/app/build/outputs/apk/debug/
+          else
+            echo "❌ APK not found"
+            find android -name "*.apk" 2>/dev/null || echo "No APK files found"
+            exit 1
+          fi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
