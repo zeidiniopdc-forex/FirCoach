@@ -424,6 +424,48 @@ interface ValidationError {
 
 ---
 
+## 📱 ساخت APK اندروید
+
+این پروژه از [Capacitor](https://capacitorjs.com/) برای تبدیل وب اپ به اپلیکیشن اندروید استفاده می‌کند.
+
+### ساخت خودکار با GitHub Actions
+
+APK به صورت خودکار در شرایط زیر ساخته می‌شود:
+
+| Trigger | خروجی | کاربرد |
+|---------|-------|--------|
+| Push به main/develop | Debug APK | تست و توسعه |
+| Tag با فرمت `v*` | Release APK | انتشار نهایی |
+| Tag با فرمت `v*` | AAB | Google Play Store |
+
+### ساخت محلی APK
+
+```bash
+# نصب وابستگی‌ها
+npm install
+
+# ساخت وب اپ
+npm run build
+
+# افزودن پلتفرم اندروید
+npx cap add android
+
+# Sync کردن Capacitor
+npx cap sync android
+
+# باز کردن در Android Studio
+npx cap open android
+
+# یا ساخت با خط فرمان
+cd android && ./gradlew assembleDebug
+```
+
+APK در مسیر `android/app/build/outputs/apk/debug/app-debug.apk` قرار می‌گیرد.
+
+📖 [راهنمای کامل ساخت APK](ANDROID.md)
+
+---
+
 ## 📞 تماس
 
 برای سوالات و پیشنهادات:
