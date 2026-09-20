@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../contexts/AppContext';
 import { Dumbbell, Brain, Target, TrendingUp, Calendar, CheckCircle } from 'lucide-react';
 
@@ -21,47 +20,77 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col items-center text-center max-w-md"
-        >
-          <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${onboardingSlides[currentSlide].color} flex items-center justify-center mb-8 shadow-2xl`}>
-            {React.createElement(onboardingSlides[currentSlide].icon, { size: 48, className: 'text-white' })}
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#0f172a', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: '24px',
+      color: 'white'
+    }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        textAlign: 'center', 
+        maxWidth: '448px' 
+      }}>
+          <div style={{ 
+            width: '96px', 
+            height: '96px', 
+            borderRadius: '24px', 
+            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            marginBottom: '32px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
+          }}>
+            {React.createElement(onboardingSlides[currentSlide].icon, { size: 48, color: 'white' })}
           </div>
 
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
             {onboardingSlides[currentSlide].title}
           </h1>
-          <h2 className="text-lg text-indigo-300 mb-4">
+          <h2 style={{ fontSize: '18px', color: '#a5b4fc', marginBottom: '16px' }}>
             {onboardingSlides[currentSlide].subtitle}
           </h2>
-          <p className="text-slate-400 text-base leading-relaxed mb-12">
+          <p style={{ color: '#94a3b8', fontSize: '16px', lineHeight: '1.6', marginBottom: '48px', textAlign: 'center' }}>
             {onboardingSlides[currentSlide].desc}
           </p>
 
           {/* Progress dots */}
-          <div className="flex gap-2 mb-8">
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
             {onboardingSlides.map((_, i) => (
               <div
                 key={i}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  i === currentSlide ? 'w-8 bg-indigo-500' : 'w-2 bg-slate-700'
-                }`}
+                style={{
+                  height: '8px',
+                  borderRadius: '4px',
+                  transition: 'all 0.3s',
+                  width: i === currentSlide ? '32px' : '8px',
+                  backgroundColor: i === currentSlide ? '#6366f1' : '#334155'
+                }}
               />
             ))}
           </div>
 
-          <div className="flex gap-4 w-full">
+          <div style={{ display: 'flex', gap: '16px', width: '100%', maxWidth: '400px' }}>
             {currentSlide > 0 && (
               <button
                 onClick={() => setCurrentSlide(currentSlide - 1)}
-                className="flex-1 py-3 px-6 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
+                style={{
+                  flex: 1,
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  border: '1px solid #334155',
+                  backgroundColor: 'transparent',
+                  color: '#cbd5e1',
+                  cursor: 'pointer',
+                  fontSize: '16px'
+                }}
               >
                 Back
               </button>
@@ -69,14 +98,34 @@ export default function Onboarding() {
             {currentSlide < onboardingSlides.length - 1 ? (
               <button
                 onClick={() => setCurrentSlide(currentSlide + 1)}
-                className="flex-1 py-3 px-6 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors"
+                style={{
+                  flex: 1,
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  backgroundColor: '#4f46e5',
+                  color: 'white',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px'
+                }}
               >
                 Next
               </button>
             ) : (
               <button
                 onClick={handleComplete}
-                className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-500 hover:to-purple-500 transition-all"
+                style={{
+                  flex: 1,
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px'
+                }}
               >
                 Start Building Profile
               </button>
@@ -86,13 +135,19 @@ export default function Onboarding() {
           {currentSlide < onboardingSlides.length - 1 && (
             <button
               onClick={handleComplete}
-              className="mt-4 text-slate-500 text-sm hover:text-slate-300 transition-colors"
+              style={{
+                marginTop: '16px',
+                color: '#64748b',
+                fontSize: '14px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer'
+              }}
             >
               Skip
             </button>
           )}
-        </motion.div>
-      </AnimatePresence>
+      </div>
     </div>
   );
 }
