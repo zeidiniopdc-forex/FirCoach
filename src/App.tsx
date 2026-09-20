@@ -18,9 +18,23 @@ import ExerciseLibrary from './pages/ExerciseLibrary';
 import Settings from './pages/Settings';
 
 function AppContent() {
-  const { state, dispatch } = useApp();
+  const { state, dispatch, isRTL, isDark } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Theme classes helper
+  const themeClasses = {
+    bg: isDark ? 'bg-slate-950' : 'bg-slate-50',
+    text: isDark ? 'text-white' : 'text-slate-900',
+    card: isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200',
+    input: isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900',
+    muted: isDark ? 'text-slate-400' : 'text-slate-600',
+  };
+
+  // Set theme on document
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', state.settings.theme);
+  }, [state.settings.theme]);
 
   // Add session handler
   React.useEffect(() => {
@@ -41,7 +55,10 @@ function AppContent() {
   const showBottomNav = !['/prompt', '/import', '/setup'].includes(location.pathname);
 
   return (
-    <div className={`min-h-screen ${state.settings.theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <div 
+      className={`min-h-screen ${state.settings.theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}

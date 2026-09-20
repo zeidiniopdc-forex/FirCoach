@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { generatePrompt } from '../utils/promptGenerator';
-import { Copy, Share2, RefreshCw, Save, Check, Sparkles } from 'lucide-react';
+import { Copy, Share2, RefreshCw, Save, Check, Sparkles, ArrowLeft } from 'lucide-react';
 
 export default function PromptGenerator() {
   const { state, dispatch } = useApp();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -57,6 +59,14 @@ export default function PromptGenerator() {
     <div className="min-h-screen bg-slate-950 pb-24">
       <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 mb-4 text-slate-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft size={20} />
+            <span>Back to Dashboard</span>
+          </button>
+
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center">
               <Sparkles size={24} className="text-white" />

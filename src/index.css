@@ -1,29 +1,35 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #4f46e5;
-  --color-accent: #10b981;
-  --color-accent-light: #34d399;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-surface-dark: #0f172a;
-  --color-surface-dark-2: #1e293b;
-  --color-surface-dark-3: #334155;
-  --color-surface-light: #f8fafc;
-  --color-surface-light-2: #f1f5f9;
-  --color-surface-light-3: #e2e8f0;
-  --color-text-dark: #f8fafc;
-  --color-text-dark-2: #cbd5e1;
-  --color-text-dark-3: #94a3b8;
-  --color-text-light: #0f172a;
-  --color-text-light-2: #475569;
-  --color-text-light-3: #64748b;
-}
-
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Dark theme (default) */
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 * {
@@ -48,6 +54,8 @@ body {
   margin: 0;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 .rtl {

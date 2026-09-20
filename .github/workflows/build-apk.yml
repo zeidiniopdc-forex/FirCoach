@@ -3,21 +3,20 @@ name: Build Android APK
 on:
   push:
     branches: [ main, develop ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  JAVA_VERSION: '17'
+  NODE_VERSION: '24'
+  JAVA_VERSION: '21'
 
 jobs:
   build-apk:
-    name: Build Android APK
+    name: Build Debug APK
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 30
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,18 +34,23 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build web app
         run: npm run build
-
-      - name: Install Capacitor
-        run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init FitForge com.fitforge.app --web-dir=dist
 
       - name: Add Android platform
         run: npx cap add android
@@ -57,10 +61,51 @@ jobs:
       - name: Make Gradlew executable
         run: chmod +x android/gradlew
 
+      - name: Configure Android project
+        run: |
+          # Configure gradle.properties
+          cat > android/gradle.properties << EOF
+          org.gradle.java.home=$JAVA_HOME
+          org.gradle.jvmargs=-Xmx2048m
+          android.useAndroidX=true
+          android.enableJetifier=true
+          EOF
+          
+          cat android/gradle.properties
+          
+          echo "=== Updating all build.gradle files to Java 21 ==="
+          # Update all build.gradle files to use Java 21
+          find android -name "build.gradle" -type f | while read file; do
+            echo "Processing: $file"
+            sed -i 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/JavaVersion.VERSION_11/JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/sourceCompatibility .*/sourceCompatibility JavaVersion.VERSION_21/g' "$file"
+            sed -i 's/targetCompatibility .*/targetCompatibility JavaVersion.VERSION_21/g' "$file"
+          done
+          
+          echo "=== Verifying configuration ==="
+          grep -r "JavaVersion" android/ || echo "No JavaVersion found"
+          grep "useAndroidX" android/gradle.properties
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Verify APK
+        run: |
+          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            echo "✅ APK built successfully"
+            ls -lh android/app/build/outputs/apk/debug/
+          else
+            echo "❌ APK not found"
+            find android -name "*.apk" 2>/dev/null || echo "No APK files found"
+            exit 1
+          fi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -69,49 +114,16 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      - name: Build Release APK (if tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          cd android
-          ./gradlew assembleRelease
-
-      - name: Upload Release APK (if tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4
-        with:
-          name: fitforge-release-apk
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-          retention-days: 90
-
-      - name: Rename APK files
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          cp android/app/build/outputs/apk/debug/app-debug.apk fitforge-${VERSION}-debug.apk
-          cp android/app/build/outputs/apk/release/app-release-unsigned.apk fitforge-${VERSION}-release.apk
-
-      - name: Create Release with APK (if tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            fitforge-*-debug.apk
-            fitforge-*-release.apk
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build Summary
+        if: always()
         run: |
-          echo "## Android APK Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Web app built successfully" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Capacitor initialized" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Android platform added" >> $GITHUB_STEP_SUMMARY
-          echo "✅ APK built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "## 🤖 Android APK Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
             APK_SIZE=$(du -h android/app/build/outputs/apk/debug/app-debug.apk | cut -f1)
-            echo "**Debug APK Size:** $APK_SIZE" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Debug APK built successfully**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Size:** $APK_SIZE" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Build failed**" >> $GITHUB_STEP_SUMMARY
           fi

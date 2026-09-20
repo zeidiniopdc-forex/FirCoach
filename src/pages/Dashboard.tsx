@@ -6,15 +6,15 @@ import { Dumbbell, Flame, Trophy, TrendingUp, Calendar, Target, Zap, Clock, Spar
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
-  const { state } = useApp();
+  const { state, t } = useApp();
   const navigate = useNavigate();
   const activeProgram = state.programs.find(p => p.program.id === state.activeProgramId);
   
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('good_morning');
+    if (hour < 17) return t('good_afternoon');
+    return t('good_evening');
   };
 
   const todaySession = state.sessions.find(s => s.date === new Date().toISOString().split('T')[0]);

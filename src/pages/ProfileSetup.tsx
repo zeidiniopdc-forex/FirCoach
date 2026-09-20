@@ -118,6 +118,7 @@ export default function ProfileSetup() {
 
   const handleFinish = () => {
     saveCurrentStep();
+    dispatch({ type: 'COMPLETE_ONBOARDING' });
   };
 
   const toggleGoal = (type: GoalType) => {
