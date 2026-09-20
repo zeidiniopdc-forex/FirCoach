@@ -20,10 +20,17 @@ export default function Profile() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-white">Profile</h1>
-            <button onClick={() => navigate('/settings')}
-              className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
-              <Settings size={20} />
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => navigate('/setup')}
+                className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white hover:bg-indigo-500 transition-colors"
+                title="Edit Profile">
+                <Edit size={20} />
+              </button>
+              <button onClick={() => navigate('/settings')}
+                className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                <Settings size={20} />
+              </button>
+            </div>
           </div>
 
           {/* User Info Card */}
